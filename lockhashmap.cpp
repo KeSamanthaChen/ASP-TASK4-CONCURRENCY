@@ -39,33 +39,33 @@ typedef struct hm_t {
 // allocate a hashmap with given number of buckets
 // https://stackoverflow.com/questions/39397322/declaring-a-2d-array-using-double-pointer
 HM* alloc_hashmap(size_t n_buckets) {
-    return NULL;
-    // HM new_hm;
-    // new_hm.n_buckets = n_buckets;
-    // new_hm.buckets = new List*[n_buckets]; // need delete
-    // for (int i=0; i<n_buckets; i++) {
-    //     // do some thing
-    //     new_hm.buckets[i]->sentinel = new Node_HM_t;
-    //     new_hm.buckets[i]->sentinel->m_val = i; // kind of like the key
-    // }
-    // return &new_hm;
+    HM *new_hm = new HM;
+    new_hm->n_buckets = n_buckets;
+    new_hm->buckets = new List*[n_buckets]; // need delete
+    for (int i=0; i<n_buckets; i++) {
+        new_hm->buckets[i] = new List[1];
+        new_hm->buckets[i][0].sentinel = new Node_HM;
+        new_hm->buckets[i][0].sentinel->m_val = i; //// kind of like the key
+    }
+    return new_hm;
 }
 
 //free a hashamp
 void free_hashmap(HM* hm) {
-    // for (int i=0; i<hm->n_buckets; i++) {
-    //     // delete sentinel is different from delete hm->buckets[i]
-    //     Node_HM* current_node = hm->buckets[i]->sentinel;
-    //     Node_HM* pointer;
-    //     while(current_node != NULL) {
-    //         // when insert value, this will be using "new", so need to delete there
-    //         pointer = current_node;
-    //         current_node = current_node->m_next;
-    //         delete pointer;
-    //     }
-    //     delete hm->buckets[i];
-    // }
-    // delete hm->buckets;
+    for (int i=0; i<hm->n_buckets; i++) {
+        // delete sentinel is different from delete hm->buckets[i]
+        Node_HM* current_node = hm->buckets[i][0].sentinel;
+        Node_HM* pointer;
+        while(current_node != NULL) {
+            // when insert value, this will be using "new", so need to delete there
+            pointer = current_node;
+            current_node = current_node->m_next;
+            // how about m_next and padding?
+            delete pointer;
+        }
+        delete hm->buckets[i];
+    }
+    delete hm->buckets;
 }
 
 //insert val into the hm and return 0 if successful
