@@ -71,6 +71,7 @@ void free_hashmap(HM* hm) {
 //insert val into the hm and return 0 if successful
 //return 1 otherwise, e.g., could not allocate memory
 int insert_item(HM* hm, long val) {
+    std::cerr << "insert" << val << std::endl;
     long key_value = val%hm->n_buckets;
     //if the value already here? duplicated allow
     Node_HM* current_node = hm->buckets[key_value][0].sentinel;
@@ -88,6 +89,7 @@ int insert_item(HM* hm, long val) {
 //remove val from the hm, if it exist and return 0 if successful
 //return 1 if item is not found
 int remove_item(HM* hm, long val) {
+    std::cerr << "remove" << val << std::endl;
     long key_value = val%hm->n_buckets;
     Node_HM* current_node = hm->buckets[key_value][0].sentinel->m_next;
     Node_HM* previous_node = hm->buckets[key_value][0].sentinel;
