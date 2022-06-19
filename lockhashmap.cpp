@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <iostream>
+#include "chashmap.h"
 
 #define PAD 64
 
