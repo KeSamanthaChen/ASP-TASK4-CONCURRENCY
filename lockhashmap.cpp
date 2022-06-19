@@ -1,10 +1,14 @@
 #include <stddef.h>
 #include <iostream>
+#include <mutex>
+#include <vector>
 #include "chashmap.h"
 
 #define PAD 64
 
 // using mutex
+std::vector<std::mutex> bucket_mutexs;
+
 /*
 Hashmap: list of buckets
 bucket1 -> sentinel -> node1 -> node2 -> NULL
@@ -39,6 +43,9 @@ typedef struct hm_t {
 // allocate a hashmap with given number of buckets
 // https://stackoverflow.com/questions/936687/how-do-i-declare-a-2d-array-in-c-using-new
 HM* alloc_hashmap(size_t n_buckets) {
+    std::vector<std::mutex> new_list(n_buckets);
+    bucket_mutexs.swap(new_list);
+
     HM *new_hm = new HM;
     new_hm->n_buckets = n_buckets;
     new_hm->buckets = new List*[n_buckets]; // need delete
@@ -71,10 +78,11 @@ void free_hashmap(HM* hm) {
 //insert val into the hm and return 0 if successful
 //return 1 otherwise, e.g., could not allocate memory
 int insert_item(HM* hm, long val) {
-    std::cerr << "insert" << val << std::endl;
     long key_value = val%hm->n_buckets;
     //if the value already here? duplicated allow
     Node_HM* current_node = hm->buckets[key_value][0].sentinel;
+
+    bucket_mutexs[key_value].lock();
     while (current_node->m_next!=NULL) {
         current_node = current_node->m_next;
     }
@@ -83,27 +91,34 @@ int insert_item(HM* hm, long val) {
     new_node->m_next = NULL;
     new_node->m_val = val;
     current_node->m_next = new_node;
+    bucket_mutexs[key_value].unlock();
+
     return 0;
 }
 
 //remove val from the hm, if it exist and return 0 if successful
 //return 1 if item is not found
 int remove_item(HM* hm, long val) {
-    std::cerr << "remove" << val << std::endl;
     long key_value = val%hm->n_buckets;
     Node_HM* current_node = hm->buckets[key_value][0].sentinel->m_next;
     Node_HM* previous_node = hm->buckets[key_value][0].sentinel;
+
+    bucket_mutexs[key_value].lock();
     while (current_node!=NULL) {
         if (current_node->m_val == val) {
             // delete and reconnect
             previous_node->m_next = current_node->m_next;
             delete current_node;
+            bucket_mutexs[key_value].unlock();
+
             return 0;
         }
         // looping update
         previous_node = current_node;
         current_node = current_node->m_next;
     }
+    bucket_mutexs[key_value].unlock();
+
     return 1;
 }
 
@@ -111,10 +126,15 @@ int remove_item(HM* hm, long val) {
 int lookup_item(HM* hm, long val) {
     long key_value = val%hm->n_buckets;
     Node_HM* current_node = hm->buckets[key_value][0].sentinel->m_next;
+    bucket_mutexs[key_value].lock();
     while (current_node!=NULL) {
-        if (current_node->m_val == val) return 0;
+        if (current_node->m_val == val) {
+            bucket_mutexs[key_value].unlock();
+             return 0;
+        } 
         current_node = current_node->m_next;
     }
+    bucket_mutexs[key_value].unlock();
     return 1;
 }
 
