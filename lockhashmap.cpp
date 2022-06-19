@@ -107,13 +107,13 @@ int remove_item(HM* hm, long val) {
 
 //check if val exists in hm, return 0 if found, return 1 otherwise
 int lookup_item(HM* hm, long val) {
-    long key_value = val%hm->n_buckets;
-    Node_HM* current_node = hm->buckets[key_value][0].sentinel->m_next;
-    while (current_node!=NULL) {
-        if (current_node->m_val == val)
-            return 0;
-    }
-    return 1;
+    // long key_value = val%hm->n_buckets;
+    // Node_HM* current_node = hm->buckets[key_value][0].sentinel->m_next;
+    // while (current_node!=NULL) {
+    //     if (current_node->m_val == val)
+    //         return 0;
+    // }
+    // return 1;
 }
 
 //print all elements in the hashmap as follows:
@@ -121,13 +121,13 @@ int lookup_item(HM* hm, long val) {
 //Bucket 2 - val4 - val5 - val6 ...
 //Bucket N -  ...
 void print_hashmap(HM* hm) {
-    for(int i=0;i<hm->n_buckets;i++) {
-        std::cout << "Bucket " << i << std::flush;
-        Node_HM* current_node = hm->buckets[i][0].sentinel->m_next;
-        while(current_node!=NULL) {
-            std::cout << " - " << current_node->m_val << std::flush;
-            current_node = current_node->m_next;
-        }
-        std::cout << std::endl;
-    }
+    // for(int i=0;i<hm->n_buckets;i++) {
+    //     std::cout << "Bucket " << i << std::flush;
+    //     Node_HM* current_node = hm->buckets[i][0].sentinel->m_next;
+    //     while(current_node!=NULL) {
+    //         std::cout << " - " << current_node->m_val << std::flush;
+    //         current_node = current_node->m_next;
+    //     }
+    //     std::cout << std::endl;
+    // }
 }
