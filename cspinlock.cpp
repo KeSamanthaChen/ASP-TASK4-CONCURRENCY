@@ -33,15 +33,13 @@ int cspin_unlock(cspinlock_t *slock) {
 
 //allocate a lock
 cspinlock_t* cspin_alloc() {
-    cspinlock_t slock;
-    slock.lock_ = false;
-    return &slock;
+    cspinlock_t *slock = new cspinlock_t;
+    slock->lock_ = false;
+    return slock;
 }
 
 // https://stackoverflow.com/questions/4134323/c-how-to-delete-a-structure
 void cspin_free(cspinlock_t* slock) {
     // no need to free here?
-    // free(slock);
-    // slock = NULL;
-    return;
+    delete slock;
 }
