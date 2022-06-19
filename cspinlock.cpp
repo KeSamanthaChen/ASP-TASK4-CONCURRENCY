@@ -1,5 +1,4 @@
 // Reference: https://rigtorp.se/spinlock/
-
 #include "cspinlock.h"
 #include <atomic>
 
@@ -20,6 +19,7 @@ int cspin_lock(cspinlock_t *slock) {
 
 //if the lock can not be acquired, return immediately
 int cspin_trylock(cspinlock_t *slock) {
+    // this function is not be tested
     // if the frist is true, then the second will not be evaluate
     // if the first is false, the second step is to acquire the lock
     return !slock->lock_.load(std::memory_order_relaxed);
@@ -40,6 +40,5 @@ cspinlock_t* cspin_alloc() {
 
 // https://stackoverflow.com/questions/4134323/c-how-to-delete-a-structure
 void cspin_free(cspinlock_t* slock) {
-    // no need to free here?
     delete slock;
 }

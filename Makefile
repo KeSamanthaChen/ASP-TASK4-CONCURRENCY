@@ -23,11 +23,11 @@ all: libcspinlock.so liblockhashmap.so liblockfreehashmap.so
 libcspinlock.so: cspinlock.cpp
 	$(CXX) $(CXXFLAGS) -shared -fPIC -ldl -o $@ $<
 
-liblockhashmap.so: lockhashmap.c
-	$(CC) $(CFLAGS) -shared -fPIC -ldl -o $@ $<
+liblockhashmap.so: lockhashmap.cpp
+	$(CXX) $(CXXFLAGS) -shared -fPIC -ldl -o $@ $<
 
-liblockfreehashmap.so: lockfreehashmap.c
-	$(CC) $(CFLAGS) -shared -fPIC -ldl -o $@ $<
+liblockfreehashmap.so: lockfreehashmap.cpp
+	$(CXX) $(CXXFLAGS) -shared -fPIC -ldl -o $@ $<
 
 # Usually there is no need to modify this
 check: all
