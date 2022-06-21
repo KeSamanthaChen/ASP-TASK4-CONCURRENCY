@@ -1,5 +1,6 @@
 // Reference: https://stackoverflow.com/questions/2744181/how-to-call-c-function-from-c
 #include <stddef.h> // for NULL
+#include <atomic>
 #define PAD 64
 
 #ifdef __cplusplus
@@ -18,6 +19,11 @@ EXTERNC int insert_item(HM* hm, long val);
 EXTERNC int remove_item(HM* hm, long val);
 EXTERNC int lookup_item(HM* hm, long val);
 EXTERNC void print_hashmap(HM* hm);
+EXTERNC Node_HM* search_item(HM* hm, long val, std::atomic<Node_HM*>* left_node);
+
+bool is_marked_reference(void *i);
+Node_HM *get_unmarked_reference(void *w);
+Node_HM *get_marked_reference(void *w);
 
 #undef EXTERNC
 
