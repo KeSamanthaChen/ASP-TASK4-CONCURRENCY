@@ -129,10 +129,11 @@ inline Node_HM *get_marked_reference(void *w)
 //     } while (true); /*B2*/
 // }
 
-Node_HM* search_item(HM* hm, long val, std::atomic<Node_HM*>* left_node) {
+Node_HM* search_item(HM* hm, long val, Node_HM** left_node) {
     long key_value = val%hm->n_buckets;
     Node_HM* left_node_next;
     Node_HM* right_node;
+    std::atomic<Node_HM*> atomic_left_node;
     while (1) {
         Node_HM *t = hm->buckets[key_value][0].sentinel;
         Node_HM *t_next = hm->buckets[key_value][0].sentinel.load()->m_next;
@@ -156,7 +157,8 @@ Node_HM* search_item(HM* hm, long val, std::atomic<Node_HM*>* left_node) {
                 return right_node; /*R1*/
 
         /* 3: Remove one or more marked nodes */
-        if (std::atomic_compare_exchange_weak_explicit(&(left_node->load()->m_next), &left_node_next, right_node, std::memory_order_release, std::memory_order_relaxed)) /*C1*/
+        atomic_left_node = (*left_node);
+        if (std::atomic_compare_exchange_weak_explicit(&(atomic_left_node.load()->m_next), &left_node_next, right_node, std::memory_order_release, std::memory_order_relaxed)) /*C1*/
             if ((right_node != hm->buckets[key_value][0].tail) && is_marked_reference(right_node->m_next))
                 continue; /*G2*/
             else
@@ -185,7 +187,8 @@ int insert_item(HM* hm, long val) {
     Node_HM* new_node = new Node_HM;
     new_node->m_val = val;
     Node_HM* right_node;
-    std::atomic<Node_HM*> left_node;
+    Node_HM* left_node;
+    std::atomic<Node_HM*> atomic_left_node;
 
     while(1) {
         // right_node = search_item(hm, val, &left_node);
@@ -193,7 +196,8 @@ int insert_item(HM* hm, long val) {
         if ((right_node != hm->buckets[key_value][0].tail) && (right_node->m_val == val)) //for duplication, the val already exists, no insertion performs
             return 1; // if right_node has the same value with new val, and right node is not the end of list
         new_node->m_next = right_node;
-        if (std::atomic_compare_exchange_weak_explicit(&(left_node.load()->m_next), &right_node, new_node, std::memory_order_release, std::memory_order_relaxed)) /*C2*/
+        atomic_left_node = left_node;
+        if (std::atomic_compare_exchange_weak_explicit(&(atomic_left_node.load()->m_next), &right_node, new_node, std::memory_order_release, std::memory_order_relaxed)) /*C2*/
             // if the left_node.next == right_node, then the nodes are adjacent, could link the new node between them
             return 0;
     }/*B3*/
@@ -223,7 +227,9 @@ int remove_item(HM* hm, long val) {
     long key_value = val%hm->n_buckets;
     std::atomic<Node_HM*> right_node;
     Node_HM* right_node_next;
-    std::atomic<Node_HM*> left_node;
+    Node_HM* left_node;
+    std::atomic<Node_HM*> atomic_left_node;
+
     while (1) {
         right_node = search_item(hm, val, &left_node);
         if ((right_node == hm->buckets[key_value][0].tail) || (right_node.load(std::memory_order_relaxed)->m_val != val)) /*T1*/
@@ -235,7 +241,8 @@ int remove_item(HM* hm, long val) {
                 break;
     }
     Node_HM* normal_right_node = right_node; // slightly change here..
-    if (!std::atomic_compare_exchange_weak_explicit(&(left_node.load()->m_next), &normal_right_node, right_node_next, std::memory_order_release, std::memory_order_relaxed)) /*C4*/
+    atomic_left_node = left_node;
+    if (!std::atomic_compare_exchange_weak_explicit(&(atomic_left_node.load()->m_next), &normal_right_node, right_node_next, std::memory_order_release, std::memory_order_relaxed)) /*C4*/
         // what is this for...
         right_node = search_item(hm, right_node.load()->m_val, &left_node);
     return 0;
@@ -255,7 +262,7 @@ int remove_item(HM* hm, long val) {
 int lookup_item(HM* hm, long val) {
     long key_value = val%hm->n_buckets;
     Node_HM* right_node;
-    std::atomic<Node_HM*> left_node;
+    Node_HM* left_node;
     right_node = search_item(hm, val, &left_node);
     if ((right_node == hm->buckets[key_value][0].tail) || (right_node->m_val != val))
         return 1; // if right_node's val != val and right_node is the tail, then not found...
@@ -279,8 +286,9 @@ void print_hashmap(HM* hm) {
 // {
 //     HM *new_hm = alloc_hashmap(3);
 //     insert_item(new_hm, 5);
-//     insert_item(new_hm, 5);
-//     std::cout<< lookup_item(new_hm, 5) << " Hello World" << std::endl;
+//     insert_item(new_hm, 4);
+//     remove_item(new_hm, 4);
+//     std::cout<< lookup_item(new_hm, 4) << " Hello World" << std::endl;
 //     print_hashmap(new_hm);
 
 //     return 0;
