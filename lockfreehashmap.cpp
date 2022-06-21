@@ -191,10 +191,9 @@ int insert_item(HM* hm, long val) {
     std::atomic<Node_HM*> atomic_left_node;
 
     while(1) {
-        // right_node = search_item(hm, val, &left_node);
         right_node = search_item(hm, val, &left_node);
         if ((right_node != hm->buckets[key_value][0].tail) && (right_node->m_val == val)) //for duplication, the val already exists, no insertion performs
-            return 1; // if right_node has the same value with new val, and right node is not the end of list
+            return 0; // if right_node has the same value with new val, and right node is not the end of list
         new_node->m_next = right_node;
         atomic_left_node = left_node;
         if (std::atomic_compare_exchange_weak_explicit(&(atomic_left_node.load()->m_next), &right_node, new_node, std::memory_order_release, std::memory_order_relaxed)) /*C2*/
@@ -202,8 +201,6 @@ int insert_item(HM* hm, long val) {
             return 0;
     }/*B3*/
 }
-
-
 
 
 // public boolean List::delete (KeyType search_key) {
@@ -232,7 +229,7 @@ int remove_item(HM* hm, long val) {
 
     while (1) {
         right_node = search_item(hm, val, &left_node);
-        if ((right_node == hm->buckets[key_value][0].tail) || (right_node.load(std::memory_order_relaxed)->m_val != val)) /*T1*/
+        if ((right_node == hm->buckets[key_value][0].tail) || (right_node.load(std::memory_order_relaxed)->m_val != val)) // no value found here
             return 1;
         right_node_next = right_node.load(std::memory_order_relaxed)->m_next;
         if (!is_marked_reference(right_node_next))
