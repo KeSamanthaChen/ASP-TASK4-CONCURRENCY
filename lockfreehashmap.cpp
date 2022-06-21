@@ -1,3 +1,5 @@
+// Heavily reference: https://www.cl.cam.ac.uk/research/srg/netos/papers/2001-caslists.pdf
+// Lock-free data structure is too hard...
 #include <stddef.h>
 #include <iostream>
 #include <atomic>
