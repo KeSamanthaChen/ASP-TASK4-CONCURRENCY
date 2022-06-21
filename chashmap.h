@@ -4,7 +4,7 @@
 #define PAD 64
 
 #ifdef __cplusplus
-#include <atomic>
+// #include <atomic>
 #define EXTERNC extern "C"
 #else
 #define EXTERNC
@@ -20,7 +20,7 @@ EXTERNC int insert_item(HM* hm, long val);
 EXTERNC int remove_item(HM* hm, long val);
 EXTERNC int lookup_item(HM* hm, long val);
 EXTERNC void print_hashmap(HM* hm);
-EXTERNC Node_HM* search_item(HM* hm, long val, std::atomic<Node_HM*>* left_node);
+EXTERNC Node_HM* search_item(HM* hm, long val, Node_HM** left_node);
 
 EXTERNC bool is_marked_reference(void *i);
 EXTERNC Node_HM *get_unmarked_reference(void *w);
