@@ -230,7 +230,7 @@ int remove_item(HM* hm, long val) {
     while (1) {
         right_node = search_item(hm, val, &left_node);
         if ((right_node == hm->buckets[key_value][0].tail) || (right_node.load(std::memory_order_relaxed)->m_val != val)) // no value found here
-            return 1;
+            return 0;
         right_node_next = right_node.load(std::memory_order_relaxed)->m_next;
         if (!is_marked_reference(right_node_next))
             if (std::atomic_compare_exchange_weak_explicit(&(right_node.load()->m_next), /*C3*/
