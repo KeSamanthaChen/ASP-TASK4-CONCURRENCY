@@ -1,9 +1,11 @@
 // Reference: https://stackoverflow.com/questions/2744181/how-to-call-c-function-from-c
 #include <stddef.h> // for NULL
+#include <stdbool.h>
 #define PAD 64
 
 #ifdef __cplusplus
 #include <atomic>
+#include <iostream>
 #define EXTERNC extern "C"
 #else
 #define EXTERNC
