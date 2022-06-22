@@ -9,11 +9,12 @@ typedef struct cspinlock{
 //acquire the lock
 int cspin_lock(cspinlock_t *slock) {
     while (true) {
-    if (!slock->lock_.exchange(true, std::memory_order_acquire)) {
-        return 0; // acquire success
-        // cspin_trylock and exchange will retrun false if success
-    }
-    while (slock->lock_.load(std::memory_order_relaxed));
+        // the return value of exchange is the original value of lock_
+        if (!slock->lock_.exchange(true, std::memory_order_acquire)) {
+            return 0; // acquire success
+            // cspin_trylock and exchange will retrun false if success
+        }
+        while (slock->lock_.load(std::memory_order_relaxed));
     }
 }
 
